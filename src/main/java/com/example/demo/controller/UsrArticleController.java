@@ -20,6 +20,9 @@ import jakarta.servlet.http.HttpServletRequest;
 public class UsrArticleController {
 
 	@Autowired
+	private Rq rq;
+
+	@Autowired
 	private ArticleService articleService;
 
 	// 액션메서드
@@ -40,10 +43,6 @@ public class UsrArticleController {
 	public ResultData<Article> doModify(HttpServletRequest req, int id, String title, String body) {
 
 		Rq rq = (Rq) req.getAttribute("rq");
-
-
-
-
 
 		Article article = articleService.getArticleById(id);
 
@@ -71,10 +70,6 @@ public class UsrArticleController {
 	public String doDelete(HttpServletRequest req, int id) {
 
 		Rq rq = (Rq) req.getAttribute("rq");
-
-
-
-
 
 		Article article = articleService.getArticleById(id);
 
@@ -109,10 +104,6 @@ public class UsrArticleController {
 	public ResultData<Article> doWrite(HttpServletRequest req, String title, String body) {
 
 		Rq rq = (Rq) req.getAttribute("rq");
-
-
-
-
 
 		if (Ut.isEmptyOrNull(title)) {
 			return ResultData.from("F-1", "제목써");

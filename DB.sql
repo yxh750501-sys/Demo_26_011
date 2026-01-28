@@ -179,3 +179,4 @@ WHERE id = 3;
 
 
 SELECT *
+FROM article;

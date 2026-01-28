@@ -12,10 +12,12 @@ import com.example.demo.vo.ResultData;
 import com.example.demo.vo.Rq;
 
 import jakarta.servlet.http.HttpServletRequest;
-import jakarta.servlet.http.HttpSession;
 
 @Controller
 public class UsrMemberController {
+	
+	@Autowired
+	private Rq rq;
 
 	@Autowired
 	private MemberService memberService;
@@ -25,14 +27,6 @@ public class UsrMemberController {
 	public String doLogout(HttpServletRequest req) {
 
 		Rq rq = (Rq) req.getAttribute("rq");
-
-//		if (!rq.isLogined()) {
-//			return Ut.jsHistoryBack("F-A", "이미 로그아웃함");
-//		}  -> 더블체크 굳이???
-
-
-
-
 
 		rq.logout();
 
@@ -50,38 +44,24 @@ public class UsrMemberController {
 
 		Rq rq = (Rq) req.getAttribute("rq");
 
-//		if (rq.isLogined()) {
-//			return Ut.jsHistoryBack("F-A", "이미 로그인 함");
-//		}
-
-
-
-
-
-
 		if (Ut.isEmptyOrNull(loginId)) {
-
 			return Ut.jsHistoryBack("F-1", "loginId 입력해");
 		}
 		if (Ut.isEmptyOrNull(loginPw)) {
-
 			return Ut.jsHistoryBack("F-2", "loginPw 입력해");
 		}
 
 		Member member = memberService.getMemberByLoginId(loginId);
 
 		if (member == null) {
-
 			return Ut.jsHistoryBack("F-3", Ut.f("%s는 없는 아이디", loginId));
 		}
 
 		if (member.getLoginPw().equals(loginPw) == false) {
-
 			return Ut.jsHistoryBack("F-4", "비밀번호 x");
 		}
 
 		rq.login(member);
-
 
 		return Ut.jsReplace("S-1", Ut.f("%s님 환영합니다", member.getNickname()), "/");
 	}
@@ -90,16 +70,6 @@ public class UsrMemberController {
 	@ResponseBody
 	public ResultData<Member> doJoin(HttpServletRequest req, String loginId, String loginPw, String name,
 			String nickname, String cellphoneNum, String email) {
-
-
-
-
-
-
-
-//		if (isLogined) {
-//			return ResultData.from("F-A", "이미 로그인중");
-//		}
 
 		if (Ut.isEmptyOrNull(loginId)) {
 			return ResultData.from("F-1", "loginId 입력해");
