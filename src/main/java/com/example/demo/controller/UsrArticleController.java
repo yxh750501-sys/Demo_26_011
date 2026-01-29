@@ -9,8 +9,10 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseBody;
 
 import com.example.demo.service.ArticleService;
+import com.example.demo.service.BoardService;
 import com.example.demo.util.Ut;
 import com.example.demo.vo.Article;
+import com.example.demo.vo.Board;
 import com.example.demo.vo.ResultData;
 import com.example.demo.vo.Rq;
 
@@ -25,7 +27,9 @@ public class UsrArticleController {
 	@Autowired
 	private ArticleService articleService;
 
-	// 액션메서드
+	@Autowired
+	private BoardService boardService;
+
 	@RequestMapping("/usr/article/detail")
 	public String showDetail(HttpServletRequest req, Model model, int id) {
 
@@ -38,22 +42,37 @@ public class UsrArticleController {
 		return "usr/article/detail";
 	}
 
+	@RequestMapping("/usr/article/modify")
+	public String showModify(HttpServletRequest req, Model model, int id) {
+		Rq rq = (Rq) req.getAttribute("rq");
+
+		Article article = articleService.getForPrintArticle(rq.getLoginedMemberId(), id);
+
+		if (article == null) {
+			return Ut.jsHistoryBack("F-1", Ut.f("%d번 게시글은 없어", id));
+		}
+
+		model.addAttribute("article", article);
+
+		return "/usr/article/modify";
+	}
+
 	@RequestMapping("/usr/article/doModify")
 	@ResponseBody
-	public ResultData<Article> doModify(HttpServletRequest req, int id, String title, String body) {
+	public String doModify(HttpServletRequest req, int id, String title, String body) {
 
 		Rq rq = (Rq) req.getAttribute("rq");
 
 		Article article = articleService.getArticleById(id);
 
 		if (article == null) {
-			return ResultData.from("F-1", Ut.f("%d번 게시글은 없어", id));
+			return Ut.jsHistoryBack("F-1", Ut.f("%d번 게시글은 없어", id));
 		}
 
 		ResultData userCanModifyRd = articleService.userCanModify(rq.getLoginedMemberId(), article);
 
 		if (userCanModifyRd.isFail()) {
-			return userCanModifyRd;
+			return Ut.jsHistoryBack(userCanModifyRd.getResultCode(), userCanModifyRd.getMsg());
 		}
 
 		if (userCanModifyRd.isSuccess()) {
@@ -62,7 +81,7 @@ public class UsrArticleController {
 
 		article = articleService.getArticleById(id);
 
-		return ResultData.from(userCanModifyRd.getResultCode(), userCanModifyRd.getMsg(), "이번에 수정된 글 ", article);
+		return Ut.jsReplace(userCanModifyRd.getResultCode(), userCanModifyRd.getMsg(), "../article/detail?id=" + id);
 	}
 
 	@RequestMapping("/usr/article/doDelete")
@@ -91,25 +110,37 @@ public class UsrArticleController {
 	}
 
 	@RequestMapping("/usr/article/list")
-	public String showList(Model model) {
+	public String showList(Model model, int boardId) {
+
+		Board board = boardService.getBoardById(boardId);
+
 		List<Article> articles = articleService.getArticles();
+		
+//		System.out.println(board);
 
 		model.addAttribute("articles", articles);
+		model.addAttribute("board", board);
 
 		return "/usr/article/list";
 	}
 
+	@RequestMapping("/usr/article/write")
+	public String showWrite() {
+
+		return "usr/article/write";
+	}
+
 	@RequestMapping("/usr/article/doWrite")
 	@ResponseBody
-	public ResultData<Article> doWrite(HttpServletRequest req, String title, String body) {
+	public String doWrite(HttpServletRequest req, String title, String body) {
 
 		Rq rq = (Rq) req.getAttribute("rq");
 
 		if (Ut.isEmptyOrNull(title)) {
-			return ResultData.from("F-1", "제목써");
+			return Ut.jsHistoryBack("F-1", "제목써");
 		}
 		if (Ut.isEmptyOrNull(body)) {
-			return ResultData.from("F-2", "내용써");
+			return Ut.jsHistoryBack("F-2", "내용써");
 		}
 
 		ResultData doWriteRd = articleService.writeArticle(rq.getLoginedMemberId(), title, body);
@@ -118,7 +149,7 @@ public class UsrArticleController {
 
 		Article article = articleService.getArticleById(id);
 
-		return ResultData.newData(doWriteRd, "이번에 쓰여진 글 / 새로 INSERT 된 article", article);
+		return Ut.jsReplace(doWriteRd.getResultCode(), doWriteRd.getMsg(), "../article/detail?id=" + id);
 	}
 
 }
