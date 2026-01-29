@@ -18,22 +18,11 @@ public class ArticleService {
 
 	public ArticleService(ArticleRepository articleRepository) {
 		this.articleRepository = articleRepository;
-
 	}
 
+	public ResultData writeArticle(int loginedMemberId, String title, String body, String boardId) {
 
-
-
-
-
-
-
-
-
-
-	public ResultData writeArticle(int loginedMemberId, String title, String body) {
-
-		articleRepository.writeArticle(loginedMemberId, title, body);
+		articleRepository.writeArticle(loginedMemberId, title, body, boardId);
 
 		int id = articleRepository.getLastInsertId();
 
@@ -93,6 +82,10 @@ public class ArticleService {
 
 	public List<Article> getArticles() {
 		return articleRepository.getArticles();
+	}
+
+	public List<Article> getForPrintArticles(int boardId) {
+		return articleRepository.getForPrintArticles(boardId);
 	}
 
 }
